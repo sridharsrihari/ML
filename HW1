@@ -29,8 +29,6 @@ def nearest_neighbours(sample_size,test_data,train_data,train_labels):
     result=np.apply_along_axis(calc_nearest,1,test_data,train,labels)
     return result
 
-def nearest_neighbour_prototype(sample_size,test_data,,train_data,train_labels):
-
 
 def calc_error_rate(result,testlabels):
     diff=result-testlabels
@@ -70,7 +68,7 @@ ocr=loadmat('ocr.mat')
 train_data=ocr['data']
 test=ocr['testdata']
 #sample_size=1000
-sample_sizes = np.array([1000, 2000, 4000, 8000])
+sample_sizes = np.array([10, 20, 40, 80])
 #res=nearest_neighbours(sample_size,test,ocr['data'],ocr['labels'])
 #error_rate=calc_error_rate(res,ocr['testlabels'])
 start_time=time.time()
