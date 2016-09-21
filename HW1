@@ -5,16 +5,17 @@ from scipy.io import loadmat
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import random
+import time
 
 
 def calc_nearest(test_data,train_data,train_labels):
     test=np.matrix(test_data,float)
     train=np.array(train_data,float)
-
-    mult=np.multiply(train-test,train-test)
-    sum=np.sum(mult,1)
-    sqrt=np.sqrt(sum)
-    min=np.argmin(sqrt)
+    min=np.argmin(np.sqrt(np.sum(np.square(train-test),1)))
+    #mult=np.multiply(train-test,train-test)
+    #sum=np.sum(mult,1)
+    #sqrt=np.sqrt(sum)
+    #min=np.argmin(sqrt)
     result=train_labels[min]
     return result
 
@@ -28,9 +29,7 @@ def nearest_neighbours(sample_size,test_data,train_data,train_labels):
 def calc_error_rate(result,testlabels):
     diff=result-testlabels
     errors=np.count_nonzero(diff)
-    print errors
     error_rate=(errors/len(testlabels))*100
-    print error_rate
     return error_rate
 
 def compute_all_errors(sample_sizes,test_data,train_data,train_labels,test_labels):
@@ -38,12 +37,15 @@ def compute_all_errors(sample_sizes,test_data,train_data,train_labels,test_label
     trials=2
     errors=[]
     for s in sample_sizes:
-        sum=0
+        print("Sample: %s"%s)
         for i in range(trials):
+            time_start=time.time()
+            print("Iteration: %s"%i)
             res=nearest_neighbours(s,test_data,train_data,train_labels)
             error_rate=calc_error_rate(res,test_labels)
             errors.append(error_rate)
-            sum=sum+error_rate
+            print("Error: %s"%error_rate)
+            print("--- %s seconds ---" % (time.time() - time_start))
     return errors
 
 def plot(sample_sizes,errors):
@@ -62,11 +64,13 @@ ocr=loadmat('ocr.mat')
 train_data=ocr['data']
 test=ocr['testdata']
 #sample_size=1000
-sample_sizes = np.array([10, 20, 40, 80])
+sample_sizes = np.array([1000, 2000, 4000, 8000])
 #res=nearest_neighbours(sample_size,test,ocr['data'],ocr['labels'])
 #error_rate=calc_error_rate(res,ocr['testlabels'])
+start_time=time.time()
 test_results=compute_all_errors(sample_sizes,test,ocr['data'],ocr['labels'],ocr['testlabels'])
-print(test_results[1])
+print("--- %s seconds ---" % (time.time() - start_time))
+print test_results
 plot(sample_sizes,test_results)
 
 
