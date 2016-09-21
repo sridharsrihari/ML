@@ -9,22 +9,28 @@ import time
 
 
 def calc_nearest(test_data,train_data,train_labels):
-    test=np.matrix(test_data,float)
-    train=np.array(train_data,float)
-    min=np.argmin(np.sqrt(np.sum(np.square(train-test),1)))
-    #mult=np.multiply(train-test,train-test)
-    #sum=np.sum(mult,1)
-    #sqrt=np.sqrt(sum)
-    #min=np.argmin(sqrt)
+    #test=np.matrix(test_data,float)
+    #train=np.array(train_data,float)
+    #min=np.argmin(np.sqrt(np.sum(np.square(train_data-test_data),1)))
+    sub=np.subtract(train_data,test_data)
+    mult=np.square(sub)
+    sum=np.sum(mult,1)
+    sqrt=np.sqrt(sum)
+    min=np.argmin(sqrt)
     result=train_labels[min]
+    #result=train_labels[np.argmin(np.sqrt(np.sum(np.square(np.subtract(train_data,test_data)),1)))]
     return result
 
 def nearest_neighbours(sample_size,test_data,train_data,train_labels):
     sel = random.sample(xrange(60000), sample_size)
-    train=ocr['data'][sel].astype('float')
+    train=np.array(ocr['data'][sel].astype('float'),float)
+    test_data=np.array(test_data,float)
     labels=ocr['labels'][sel]
     result=np.apply_along_axis(calc_nearest,1,test_data,train,labels)
     return result
+
+def nearest_neighbour_prototype(sample_size,test_data,,train_data,train_labels):
+
 
 def calc_error_rate(result,testlabels):
     diff=result-testlabels
@@ -34,7 +40,7 @@ def calc_error_rate(result,testlabels):
 
 def compute_all_errors(sample_sizes,test_data,train_data,train_labels,test_labels):
     #sample_sizes=np.array(100,200,400,800,1000)
-    trials=2
+    trials=10
     errors=[]
     for s in sample_sizes:
         print("Sample: %s"%s)
@@ -49,7 +55,7 @@ def compute_all_errors(sample_sizes,test_data,train_data,train_labels,test_label
     return errors
 
 def plot(sample_sizes,errors):
-    errors_array=np.array(errors).reshape(4,2)
+    errors_array=np.array(errors).reshape(4,10)
     means=np.mean(errors_array,1)
     std_devs=np.std(errors_array,1)
     plt.figure()
@@ -69,7 +75,7 @@ sample_sizes = np.array([1000, 2000, 4000, 8000])
 #error_rate=calc_error_rate(res,ocr['testlabels'])
 start_time=time.time()
 test_results=compute_all_errors(sample_sizes,test,ocr['data'],ocr['labels'],ocr['testlabels'])
-print("--- %s seconds ---" % (time.time() - start_time))
+print("Total Time--- %s seconds ---" % (time.time() - start_time))
 print test_results
 plot(sample_sizes,test_results)
 
