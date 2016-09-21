@@ -30,14 +30,61 @@ def nearest_neighbours(sample_size,test_data,train_data,train_labels):
     return result
 
 
+def calc_label_matrix(train,labels):
+    train=np.array(train,float)
+    labels=np.array(labels,float)
+    indices_0 = np.array(np.where(labels == 0)[0])
+    indices_1= np.array(np.where(labels==1)[0])
+    indices_2= np.array(np.where(labels==2)[0])
+    indices_3=np.array(np.where(labels==3)[0])
+    indices_4 = np.array(np.where(labels ==4)[0])
+    indices_5 = np.array(np.where(labels ==5)[0])
+    indices_6 = np.array(np.where(labels ==6)[0])
+    indices_7=np.array(np.where(labels ==7)[0])
+    indices_8=np.array(np.where(labels ==8)[0])
+    indices_9 = np.array(np.where(labels ==9)[0])
+    mat=np.array([indices_0,indices_1,indices_2,indices_3,indices_4,indices_5,indices_6,indices_7,indices_8,indices_9])
+    return mat
+
+def calc_nearest_prototype(sample_size,test_data,train,labels):
+    train=np.array(ocr['data'].astype('float'),float)
+    labels=np.array(train_labels,float)
+
+    indices_0 = np.array(np.where(labels == 0)[0])
+    indices_1= np.array(np.where(labels==1)[0])
+    indices_2= np.array(np.where(labels==2)[0])
+    indices_3=np.array(np.where(labels==3)[0])
+    indices_4 = np.array(np.where(labels ==4)[0])
+    indices_5 = np.array(np.where(labels ==5)[0])
+    indices_6 = np.array(np.where(labels ==6)[0])
+    indices_7=np.array(np.where(labels ==7)[0])
+    indices_8=np.array(np.where(labels ==8)[0])
+    indices_9 = np.array(np.where(labels ==9)[0])
+    mat=np.array([indices_0,indices_1,indices_2,indices_3,indices_4,indices_5,indices_6,indices_7,indices_8,indices_9])
+    proto_size=sample_size/10
+    #mat=calc_label_matrix(train,labels)
+    indices=[]
+    for i in range(10):
+        sel= random.sample(xrange(mat[i].size), int(proto_size))
+        indices.append(mat[i][sel])
+    indices=np.ravel(indices)
+    prototype_train=train[indices]
+    prototype_labels=labels[indices]
+    result=np.apply_along_axis(calc_nearest,1,test_data,prototype_train,prototype_labels)
+    print(prototype_labels.shape)
+    return result
+
+
 def calc_error_rate(result,testlabels):
     diff=result-testlabels
     errors=np.count_nonzero(diff)
     error_rate=(errors/len(testlabels))*100
     return error_rate
 
-def compute_all_errors(sample_sizes,test_data,train_data,train_labels,test_labels):
+def compute_all_errors(sample_sizes,test_data,train_data,train_labels,test_labels,proto):
     #sample_sizes=np.array(100,200,400,800,1000)
+    if(proto!=0):
+        mat=calc_label_matrix(train_data,train_labels)
     trials=10
     errors=[]
     for s in sample_sizes:
@@ -45,7 +92,10 @@ def compute_all_errors(sample_sizes,test_data,train_data,train_labels,test_label
         for i in range(trials):
             time_start=time.time()
             print("Iteration: %s"%i)
-            res=nearest_neighbours(s,test_data,train_data,train_labels)
+            if(proto==0):
+                res=nearest_neighbours(s,test_data,train_data,train_labels)
+            else:
+                res=calc_nearest_prototype(mat,s,test_data,train_data,train_labels)
             error_rate=calc_error_rate(res,test_labels)
             errors.append(error_rate)
             print("Error: %s"%error_rate)
@@ -67,12 +117,22 @@ def plot(sample_sizes,errors):
 ocr=loadmat('ocr.mat')
 train_data=ocr['data']
 test=ocr['testdata']
+train_labels=ocr['labels']
+test_labels=ocr['testlabels']
+#debug=np.array(train_data)
+#print debug.shape[0]
+mat=calc_label_matrix(train_data,train_labels)
+proto_result=calc_nearest_prototype(1000,test,train_data,train_labels)
+error_rate=calc_error_rate(proto_result,test_labels)
+print(error_rate)
+exit(0)
+
 #sample_size=1000
 sample_sizes = np.array([10, 20, 40, 80])
 #res=nearest_neighbours(sample_size,test,ocr['data'],ocr['labels'])
 #error_rate=calc_error_rate(res,ocr['testlabels'])
 start_time=time.time()
-test_results=compute_all_errors(sample_sizes,test,ocr['data'],ocr['labels'],ocr['testlabels'])
+test_results=compute_all_errors(sample_sizes,test,ocr['data'],ocr['labels'],ocr['testlabels'],1)
 print("Total Time--- %s seconds ---" % (time.time() - start_time))
 print test_results
 plot(sample_sizes,test_results)
