@@ -62,18 +62,25 @@ def calc_nearest(test_data,train_data,train_labels):
     #print result[min]
     #return result[min]
 
+def nearest_neighbours(test_data,train_data,train_labels):
+    result=np.apply_along_axis(calc_nearest,1,test_data,train_data,train_labels)
+    return result
+
 
 ocr=loadmat('ocr.mat')
+#print(ocr['testdata'].shape)
+#exit(0)
 #print(ocr['data'].shape)
 #print(ocr['label'].shape)
 data1=ocr['data'][1]
 data2=ocr['data'][2]
 train_data=ocr['data']
 print(train_data.shape)
-test=ocr['data'][1000:1100]
+test=ocr['testdata'][1000:1100]
 #calc_nearest(ocr['data'][:5000],ocr['labels'][:5000],test_data)
-res=np.apply_along_axis(calc_nearest,1,test,ocr['data'][:2000],ocr['labels'][:2000])
-print(ocr['labels'][1000:1100]-res)
+res=nearest_neighbours(test,ocr['data'][:10000],ocr['labels'][:10000])
+#res=np.apply_along_axis(calc_nearest,1,test,ocr['data'][:2000],ocr['labels'][:2000])
+print(ocr['testlabels'][1000:1100]-res)
 
 
 #(nearest,dist)=calc_nearest_neighbour(test_data,ocr['data'],1000)
