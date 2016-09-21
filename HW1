@@ -1,0 +1,84 @@
+import numpy as np
+import numpy.linalg as la
+from scipy.io import loadmat
+import matplotlib.pyplot as plt
+from matplotlib import cm
+
+
+def calc_dist(img_1,img_2):
+    array_1=np.array(img_1,float)
+    array_2=np.array(img_2,float)
+    i=0
+    dist=0
+    result = np.zeros(array_1.size,float)
+    while i < array_1.size:
+        result[i]=np.sqrt(pow(array_1[i]-array_2[i],2))
+        dist+=result[i]
+        i+=1
+    print (i)
+    return dist
+
+def calc_nearest_neighbour(img,ocr_data,limit):
+    nearest=0
+    i=0
+    dist=float("inf")
+    test_array=np.array(img,float)
+    while i <limit:
+        input_array=np.array(ocr['data'][i],float)
+        temp_dist=calc_dist(input_array,test_array)
+        if(temp_dist<dist):
+            dist=temp_dist
+            nearest=i
+        print("Distance this iteration: %s"%temp_dist)
+        print("Shortest Distance till now %s"%dist)
+        i+=1
+    print("Nearest neighbour index: %s"%nearest)
+    print("Nearest Neighbour Distance: %s"%dist)
+    return nearest,dist
+
+def calc_nearest(test_data,train_data,train_labels):
+    test=np.matrix(test_data,float)
+    train=np.array(train_data,float)
+    #print train_labels
+   # print test
+
+    mult=np.multiply(train-test,train-test)
+    #print mult
+    #print mult
+
+    sum=np.sum(mult,1)
+    #print sum
+    sqrt=np.sqrt(sum)
+    #print("SQRT")
+    #print sqrt
+    #print sqrt
+    min=np.argmin(sqrt)
+    #print("Min")
+    #print min
+    #print min
+    result=train_labels[min]
+    #print result
+    return result
+    #print result[min]
+    #return result[min]
+
+
+ocr=loadmat('ocr.mat')
+#print(ocr['data'].shape)
+#print(ocr['label'].shape)
+data1=ocr['data'][1]
+data2=ocr['data'][2]
+train_data=ocr['data']
+print(train_data.shape)
+test=ocr['data'][1000:1100]
+#calc_nearest(ocr['data'][:5000],ocr['labels'][:5000],test_data)
+res=np.apply_along_axis(calc_nearest,1,test,ocr['data'][:2000],ocr['labels'][:2000])
+print(ocr['labels'][1000:1100]-res)
+
+
+#(nearest,dist)=calc_nearest_neighbour(test_data,ocr['data'],1000)
+#plt.imshow(ocr['data'][1001].reshape((28, 28)), cmap=cm.gray_r)
+#plt.show()
+#plt.imshow(ocr['data'][nearest].reshape((28, 28)), cmap=cm.gray_r)
+#plt.show()
+
