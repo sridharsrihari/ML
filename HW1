@@ -26,18 +26,48 @@ def nearest_neighbours(sample_size,test_data,train_data,train_labels):
     return result
 
 def calc_error_rate(result,testlabels):
-    diff=res-testlabels
+    diff=result-testlabels
     errors=np.count_nonzero(diff)
     print errors
-    error_rate=errors/len(testlabels)
+    error_rate=(errors/len(testlabels))*100
     print error_rate
-    return errors,error_rate
+    return error_rate
+
+def compute_all_errors(sample_sizes,test_data,train_data,train_labels,test_labels):
+    #sample_sizes=np.array(100,200,400,800,1000)
+    trials=2
+    errors=[]
+    for s in sample_sizes:
+        sum=0
+        for i in range(trials):
+            res=nearest_neighbours(s,test_data,train_data,train_labels)
+            error_rate=calc_error_rate(res,test_labels)
+            errors.append(error_rate)
+            sum=sum+error_rate
+    return errors
+
+def plot(sample_sizes,errors):
+    errors_array=np.array(errors).reshape(4,2)
+    means=np.mean(errors_array,1)
+    std_devs=np.std(errors_array,1)
+    plt.figure()
+    plt.errorbar(sample_sizes,means,std_devs,0)
+    plt.title("Plot for the Learning Curve")
+    plt.show()
+
+
+
 
 ocr=loadmat('ocr.mat')
 train_data=ocr['data']
 test=ocr['testdata']
-sample_size=1000
-res=nearest_neighbours(sample_size,test,ocr['data'],ocr['labels'])
-errors,error_rate=calc_error_rate(res,ocr['testlabels'])
+#sample_size=1000
+sample_sizes = np.array([10, 20, 40, 80])
+#res=nearest_neighbours(sample_size,test,ocr['data'],ocr['labels'])
+#error_rate=calc_error_rate(res,ocr['testlabels'])
+test_results=compute_all_errors(sample_sizes,test,ocr['data'],ocr['labels'],ocr['testlabels'])
+print(test_results[1])
+plot(sample_sizes,test_results)
+
 
 
